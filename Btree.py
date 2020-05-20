@@ -31,9 +31,9 @@ class Node():
             if self.leaf == False:
                 self.child[i].traverse()
             print(self.keys[i], end=" ")
-        # Print the subtree rooted with the lat child
+        # Print the subtree rooted with the last child
         if self.leaf == False:
-            self.child[-1].traverse()
+            self.child[self.nk].traverse()     ########################
             
     def search(self, key):
         """Searches key in a subtree rooted
@@ -51,32 +51,6 @@ class Node():
         # Otherwise Look elsewhere
         return self.child[i].search(key)
     
-    def makePlace(self, key):
-        """
-        This function does two things 
-            a) Finds the location of new key to be inserted 
-            b) Moves all greater keys to one place ahead
-        """
-        # Index of the leftmost key
-        i = self.nk-1
-        # Move keys forward one position each
-        while i >= 0 and self.keys[i] > key:
-            self.keys[i+1] = self.keys[i]
-            i -= 1
-        # return key position
-        return i+1
-        
-    def findChild(self, key):
-        """
-        Find the child which is going to have the new key
-        """
-        # Index of the leftmost key
-        i = self.nk-1
-        while i >= 0 and self.keys[i] > key:
-            i -= 1
-        # return child index
-        return i+1
-        
     
     def insertNonFull(self, key):
         """
@@ -96,21 +70,45 @@ class Node():
         else: # Internal node
             i = self.findChild(key)
             # If child[i] is full
-            if self.child[i].nk == 2*self.nk-1:
+            if self.child[i].nk == 2*self.l-1:
                 # Split
                 self.splitChild(i, self.child[i])
                 # 1. The mid key goes up
                 # 2. Decide which half to have the new key
                 if self.keys[i] < key: i+=1 # go right
             self.child[i].insertNonFull(key)
-
-                    
-                    
             
-            
+    def makePlace(self, key):
+        """
+        This function does two things 
+            a) Finds the location of new key to be inserted 
+            b) Moves all greater keys to one place ahead
+        """
+        # Index of the leftmost key
+        i = self.nk-1
+        # Move keys forward one position each
+        while i >= 0 and self.keys[i] > key:
+            self.keys[i+1] = self.keys[i]
+            i -= 1
+        # return key position
+        return i+1
+        
+    def findChild(self, key):
+        """
+        Find the child which is going to have the new key
+        """
+        print("[debug] finding a child")
+        # Index of the leftmost key
+        i = self.nk-1
+        while i >= 0 and self.keys[i] > key:
+            i -= 1
+        # return child index
+        return i+1
+        
             
         
     def splitChild(self, i, y):
+        print("[debug] spliting a child")
         """
         A utility function to split the child y of this node. i is index of y in 
         child array C[].  The Child y must be full when this function is called 
@@ -169,6 +167,7 @@ class BTree():
     def insert(self, key):
         # If the tree is empty
         if self.root == None:
+            print("[debug] inserting first key...")
             # Create the root
             self.root = Node(self.l, True)
             self.root.keys[0] = key
@@ -177,11 +176,12 @@ class BTree():
             # If root is full,then the tree grows in height
             # means, we split
             if self.root.nk == 2*self.l-1:
+                print("[debug] splitting...")
                 # Create a new root
                 nr = Node(self.l, False)
                 
                 # Add old root as its child
-                nr.child[0] = nr
+                nr.child[0] = self.root
                 
                 # Split the old root then move one key up
                 nr.splitChild(0, self.root)
@@ -195,6 +195,7 @@ class BTree():
                 # Update root
                 self.root = nr
             else:
+                print("[debug] insertNonFull...")
                 self.root.insertNonFull(key)
                 
                 
