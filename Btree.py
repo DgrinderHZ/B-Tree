@@ -148,7 +148,148 @@ class Node():
         # Update nk
         self.nk += 1
         
+    #_____________________ Deletion part _________________________
+    
+    def findKey(self, key):
+        """
+        A function that returns the index of the first key that is greater 
+        or equal to k
+        """
+        idx = 0
+        while idx < self.nk and self.keys[idx] < key: idx += 1
+        return idx
             
+    
+    def remove(self, key):
+        """
+        A wrapper function to remove the key k in subtree rooted with 
+        this node. 
+        """
+        idx = self.findKey(key)
+        
+        # If the key is in the current node
+        if idx < self.nk and self.keys[idx] == key:
+            if self.leaf: 
+                self.removeFromLeaf(idx)
+            else:
+                self.removeFromNonLeaf(idx)
+        else:
+            # If the current node is leaf, then the key
+            # is not present in tree
+            if self.leaf:
+                print("[Exception] the key {} is not present in the tree.".format(key))
+                return
+            
+            # The key to be removed is present in the sub-tree rooted with this node 
+            # The flag indicates whether the key is present in the sub-tree rooted 
+            # with the last child of this node
+            flag = (idx == self.nk)
+            
+            # If the child where the key is supposed to exist has less that (l) keys, 
+            # we fill that child 
+            if self.child[idx].nk < self.l: self.fill(idx)
+            
+            # If the last child has been merged, it must have merged with the previous 
+            # child and so we recurse on the (idx-1)th child. Else, we recurse on the 
+            # (idx)th child which now has atleast (l=L) keys 
+            if flag and idx > self.nk: 
+                self.child[idx-1].remove(key)
+            else: self.child[idx].remove(key)
+        
+                
+                
+    
+    def removeFromLeaf(self, idx):
+        """
+        A function to remove the key present in idx-th position in 
+        this node which is a leaf (the sweetest cake!)
+        """
+        # Crush the keys[idx] by moving all keys after
+        # it one place backward
+        for i in range(idx+1, self.nk): self.keys[i-1] = self.keys[i]
+        # Reduce the number of keys
+        self.nk -= 1
+
+    def removeFromNonLeaf(self, idx):
+        """
+        A function to remove the key present in idx-th position in 
+        this node which is a non-leaf node 
+        """
+        k = self.keys[idx]
+        
+        # If the child that precedes k (child[idx]) has atleast (l) keys, 
+        # find the predecessor 'pred' of k in the subtree rooted at 
+        # child[idx]. Replace k by pred. Recursively delete pred in child[idx]
+        if self.child[idx].nk >= self.l:
+            pred = self.getPred(idx)
+            self.keys[idx] = pred
+            self.child[idx].remove(pred)
+        
+            # If the child[idx] has less that t keys, examine child[idx+1]. 
+            # If child[idx+1] has atleast (l) keys, find the successor 'succ' of k in 
+            # the subtree rooted at child[idx+1] 
+            # Replace k by succ 
+            # Recursively delete succ inchildC[idx+1]
+        elif self.child[idx+1].nk >= self.l:
+            succ = self.getSucc(idx)
+            self.keys[idx] = succ
+            self.child[idx+1] .remove(succ)
+            
+            # If both child[idx] and child[idx+1] has less that t keys,
+            # merge k and all of child[idx+1]into child[idx]
+            # Now child[idx] contains 2l-1 keys
+            # Free child[idx+1] and recursively delete k from child[idx] 
+        else:
+            self.merge(idx)
+            self.child[idx].remove(k)
+        
+    
+    def getPred(self, idx):
+        """
+        A function to get the predecessor of the key- where the key 
+        is present in the idx-th position in the node 
+        """
+        pass
+    
+    def getSucc(self, idx):
+        """
+         A function to get the successor of the key- where the key 
+         is present in the idx-th position in the node
+        """
+        pass
+    
+    def fill(self, idx):
+        """
+        A function to fill up the child node present in the idx-th 
+        position in the C[] array if that child has less than t-1 keys  
+        """
+        pass
+    
+    def borrowFromPrev(self, idx):
+        """
+        A function to borrow a key from the C[idx-1]-th node and place 
+        it in C[idx]th node 
+        """
+        pass
+    
+    def borrowFromNext(self, idx):
+        """
+        A function to borrow a key from the C[idx+1]-th node and place it 
+        in C[idx]th node 
+        """
+        pass
+    
+    def merge(self, idx):
+        """
+        A function to merge idx-th child of the node with (idx+1)th child of 
+        the node 
+        """
+        pass
+    
+    
+    
+    
+    
     
     
 
@@ -197,6 +338,32 @@ class BTree():
             else:
                 print("[debug] insertNonFull...")
                 self.root.insertNonFull(key)
+                
+    def remove(self, key):
+        """ 
+        This function removes key from the B tree
+        """
+        # Check if tree is empty
+        if self.root == None:
+            print("[Exception] The tree is empty.")
+            return
+        # Start from root
+        self.root.remove(key)
+        
+        # If the root has 0 keys now (means key was in root by itself)
+        # make its 1st child as the new root if it exists, otherwise
+        # set root as None (tree becomes empty)
+        if self.root.nk == 0:
+            tmp = self.root
+            if self.root.leaf:
+                self.root = None
+            else:
+                self.root = self.root.child[0]
+            # free
+            del tmp
+        
+        
+            
                 
                 
     
