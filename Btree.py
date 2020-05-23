@@ -249,42 +249,151 @@ class Node():
         A function to get the predecessor of the key- where the key 
         is present in the idx-th position in the node 
         """
-        pass
+        # Keep moving to the right most node until we reach a leaf
+        cur = self.child[idx]
+        while cur.leaf == False:
+            cur = cur.child[cur.nk]
+        
+        # Return the last key of the leaf
+        return cur.keys[cur.nk]
+    
     
     def getSucc(self, idx):
         """
          A function to get the successor of the key- where the key 
          is present in the idx-th position in the node
         """
-        pass
+        # Keep moving to the left most node starting
+        # from child[idx+1] until we reach a leaf
+        cur = self.child[idx+1]
+        while cur.leaf == False:
+            cur = cur.child[0]
+        
+        # Return the first key of the leaf
+        return cur.keys[0]
     
     def fill(self, idx):
         """
         A function to fill up the child node present in the idx-th 
         position in the C[] array if that child has less than t-1 keys  
         """
-        pass
+        # If the previous child[idx-1] has more than l-1 keys,
+        # borrow from that child
+        if idx != 0 and self.child[idx-1].nk >= self.l:
+            self.borrowFromPrev(idx)
+            
+            # If the next child[idx+1] has more than l-1 keys,
+            # borrow from that child
+        elif idx != self.nk and self.child[idx+1].nk >= self.l:
+            self.borrowFromNext(idx)
+            
+            # Otherwise, Merge child[idx] with its sibling:
+            # If child[idx] is the last child, merge it with with its previous sibling 
+            # Otherwise merge it with its next sibling
+            if idx != self.nk:
+                self.merge(idx)
+            else:
+                self.merge(idx-1)
     
     def borrowFromPrev(self, idx):
         """
         A function to borrow a key from the C[idx-1]-th node and place 
         it in C[idx]th node 
         """
-        pass
-    
+        child = self.child[idx]
+        sibling = self.child[idx-1]
+        
+        # The last key  from child[idx-1] goes up to the parent 
+        # and keys[idx-1] from parent is inserted as the first key in child[idx]
+        # Thus, the sibling loses one keyand child gains one key
+        
+        # Move all keys in child[idx] one step ahead 
+        for i in range(child.nk-1, -1, -1): child.keys[i+1] = child.keys[i]
+        
+        # if child[idx] is not a leaf, move all its child one step ahead
+        if child.leaf == False: 
+            for i in range(child.nk, -1, -1): child.child[i+1] = child.child[i]
+        
+        # Setting child's first key equal to keys[idx-1]  from the current node 
+        child.keys[0] = self.keys[idx-1]
+        
+        # Moving sibling's last child as child[idx]'s first child
+        if child.leaf == False: child.child[0] = sibling.child[sibling.nk]
+        
+        # Moving the key from the sibling to the parent 
+        # This reduces the number of keys in the sibling
+        self.keys[idx-1] = sibling.keys[sibling.nk-1]
+        
+        child.nk +=1
+        sibling.nk -=1
+        
+            
     def borrowFromNext(self, idx):
         """
         A function to borrow a key from the C[idx+1]-th node and place it 
         in C[idx]th node 
         """
-        pass
+        child = self.child[idx]
+        sibling = self.child[idx+1]
+        
+        # keys[idx] is inserted as the last key in child[idx]
+        child.keys[child.nk] = self.keys[idx]
+        
+        # Sibling's firts child is inserted as the last 
+        # child into child[idx]
+        if child.leaf == False:
+            child.child[child.nk+1] = sibling.child[0]
+        
+        # The first key from sibling is inserted into keys[idx]
+        self.keys[idx] = sibling.keys[0]
+        
+        # Move all keys in sibling one step behind 
+        for i in range(1, sibling.nk): sibling.keys[i-1] = sibling.keys[i]
+        
+        # if sibling is not a leaf, move all its child one step behind
+        if sibling.leaf == False: 
+            for i in range(1, sibling.nk+1): sibling.child[i-1] = sibling.child[i]
+     
+        child.nk +=1
+        sibling.nk -=1
     
     def merge(self, idx):
         """
         A function to merge idx-th child of the node with (idx+1)th child of 
         the node 
         """
-        pass
+        child = self.child[idx] 
+        sibling = self.child[idx+1]
+      
+        # Pulling a key from the current node and inserting it into (l-1)th 
+        # position of child[idx] 
+        child.keys[self.l-1] = self.keys[idx]
+      
+        # Copying the keys from child[idx+1] to child[idx] at the end 
+        for i in range(sibling.nk):
+            child.keys[i+self.l] = sibling.keys[i]
+      
+        # Copying the child pointers from child[idx+1] to child[idx] 
+        if child.leaf == False:
+            for i in range(sibling.nk+1):
+                child.child[i+self.l] = sibling.child[i]
+      
+        # Moving all keys after idx in the current node one step behind - 
+        # to fill the gap created by moving keys[idx] to child[idx] 
+        for i in range(idx+1, self.nk): 
+            self.keys[i-1] = self.keys[i]; 
+      
+        # Moving the childs after (idx+1) in the current node one 
+        # step behind 
+        for i in range(idx+2, self.nk+1): 
+            self.child[i-1] = self.child[i]; 
+      
+        # Updating the key count of child and the current node 
+        child.nk += sibling.nk+1; 
+        self.nk -=1; 
+      
+        # Freeing the memory occupied by sibling 
+        del sibling 
     
     
     
