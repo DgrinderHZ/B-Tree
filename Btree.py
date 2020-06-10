@@ -156,7 +156,8 @@ class Node():
         or equal to k
         """
         idx = 0
-        while idx < self.nk and self.keys[idx] < key: idx += 1
+        while idx < self.nk and self.keys[idx] < key: 
+            idx += 1
         return idx
             
     
@@ -194,7 +195,8 @@ class Node():
             # (idx)th child which now has atleast (l=L) keys 
             if flag and idx > self.nk: 
                 self.child[idx-1].remove(key)
-            else: self.child[idx].remove(key)
+            else: 
+                self.child[idx].remove(key)
         
                 
                 
@@ -233,7 +235,7 @@ class Node():
         elif self.child[idx+1].nk >= self.l:
             succ = self.getSucc(idx)
             self.keys[idx] = succ
-            self.child[idx+1] .remove(succ)
+            self.child[idx+1].remove(succ)
             
             # If both child[idx] and child[idx+1] has less that t keys,
             # merge k and all of child[idx+1]into child[idx]
@@ -290,6 +292,7 @@ class Node():
             # Otherwise, Merge child[idx] with its sibling:
             # If child[idx] is the last child, merge it with with its previous sibling 
             # Otherwise merge it with its next sibling
+        else:
             if idx != self.nk:
                 self.merge(idx)
             else:
@@ -324,8 +327,8 @@ class Node():
         # This reduces the number of keys in the sibling
         self.keys[idx-1] = sibling.keys[sibling.nk-1]
         
-        child.nk +=1
-        sibling.nk -=1
+        child.nk += 1
+        sibling.nk -= 1
         
             
     def borrowFromNext(self, idx):
@@ -354,8 +357,8 @@ class Node():
         if sibling.leaf == False: 
             for i in range(1, sibling.nk+1): sibling.child[i-1] = sibling.child[i]
      
-        child.nk +=1
-        sibling.nk -=1
+        child.nk += 1
+        sibling.nk -= 1
     
     def merge(self, idx):
         """
@@ -389,7 +392,7 @@ class Node():
             self.child[i-1] = self.child[i]; 
       
         # Updating the key count of child and the current node 
-        child.nk += sibling.nk+1; 
+        child.nk += (sibling.nk+1); 
         self.nk -=1; 
       
         # Freeing the memory occupied by sibling 

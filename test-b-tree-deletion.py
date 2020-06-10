@@ -15,7 +15,7 @@ for n in toInsert: t.insert(n)
 print("================== Traversal of tree constructed is\n")
 t.traverse()
 
-toRemove =[6, 13, 7, 4, 2, 16]
+toRemove =[6, 14, 7, 4, 2, 16]
 for n in toRemove:
     t.remove(n)
     print("\n================== Traversal of tree after {} being removed\n".format(n))
